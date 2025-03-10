@@ -6,13 +6,9 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { z } from "zod";
 import { fileURLToPath } from "url";
 import path from "path";
-import fs from "fs";
 import "isomorphic-fetch"; // Required for MS Graph client
-import { ClientSecretCredential } from "@azure/identity";
-import { Client } from "@microsoft/microsoft-graph-client";
-// Updated import path for TokenCredentialAuthenticationProvider
-import { TokenCredentialAuthenticationProvider } from "@microsoft/microsoft-graph-client/authProviders/azureTokenCredentials/index.js";
 import dotenv from "dotenv";
+import { initializeGraphClient, initializeGraphBetaClient, logToFile } from "./auth.js";
 
 // Load environment variables
 dotenv.config();
@@ -20,89 +16,6 @@ dotenv.config();
 // Get the directory name of the current module
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
-// Log file for debugging
-const logFile = path.join(__dirname, "..", "graph-server.log");
-
-// Helper function for logging (useful for Windows debugging)
-function logToFile(message: string): void {
-  const timestamp = new Date().toISOString();
-  const logMessage = `${timestamp} - ${message}\n`;
-  
-  try {
-    fs.appendFileSync(logFile, logMessage, { encoding: "utf8" });
-  } catch (error) {
-    // Don't throw errors if logging fails
-    console.error("Failed to write to log file:", error);
-  }
-}
-
-// Initialize standard MS Graph Client
-function initializeGraphClient() {
-  try {
-    const tenantId = process.env.TENANT_ID;
-    const clientId = process.env.CLIENT_ID;
-    const clientSecret = process.env.CLIENT_SECRET;
-    const scopes = (process.env.SCOPES || "User.Read").split(",");
-
-    if (!tenantId || !clientId || !clientSecret) {
-      throw new Error("Missing required environment variables for authentication");
-    }
-
-    // Create the credential object
-    const credential = new ClientSecretCredential(tenantId, clientId, clientSecret);
-    
-    // Create an authentication provider
-    const authProvider = new TokenCredentialAuthenticationProvider(credential, {
-      scopes: scopes,
-    });
-
-    // Initialize the Graph client
-    const graphClient = Client.initWithMiddleware({
-      authProvider: authProvider,
-    });
-
-    logToFile("MS Graph client initialized successfully");
-    return graphClient;
-  } catch (error) {
-    logToFile(`Error initializing MS Graph client: ${error}`);
-    throw error;
-  }
-}
-
-// Initialize MS Graph Beta Client
-function initializeGraphBetaClient() {
-  try {
-    const tenantId = process.env.TENANT_ID;
-    const clientId = process.env.CLIENT_ID;
-    const clientSecret = process.env.CLIENT_SECRET;
-    const scopes = (process.env.SCOPES || "User.Read").split(",");
-
-    if (!tenantId || !clientId || !clientSecret) {
-      throw new Error("Missing required environment variables for authentication");
-    }
-
-    // Create the credential object
-    const credential = new ClientSecretCredential(tenantId, clientId, clientSecret);
-    
-    // Create an authentication provider
-    const authProvider = new TokenCredentialAuthenticationProvider(credential, {
-      scopes: scopes,
-    });
-
-    // Initialize the Graph client with beta endpoint
-    const graphBetaClient = Client.initWithMiddleware({
-      authProvider: authProvider,
-      baseUrl: "https://graph.microsoft.com/beta",
-    });
-
-    logToFile("MS Graph Beta client initialized successfully");
-    return graphBetaClient;
-  } catch (error) {
-    logToFile(`Error initializing MS Graph Beta client: ${error}`);
-    throw error;
-  }
-}
 
 // Create server instance with error handling for Windows
 try {
@@ -113,9 +26,19 @@ try {
     version: "1.0.0",
   });
 
+  // Get environment variables
+  const tenantId = process.env.TENANT_ID;
+  const clientId = process.env.CLIENT_ID;
+  const clientSecret = process.env.CLIENT_SECRET;
+  const scopes = (process.env.SCOPES || "User.Read").split(",");
+
+  if (!tenantId || !clientId || !clientSecret) {
+    throw new Error("Missing required environment variables for authentication");
+  }
+
   // Initialize MS Graph clients
-  const graphClient = initializeGraphClient();
-  const graphBetaClient = initializeGraphBetaClient();
+  const graphClient = initializeGraphClient(tenantId, clientId, clientSecret, scopes);
+  const graphBetaClient = initializeGraphBetaClient(tenantId, clientId, clientSecret, scopes);
 
   // Register MS Graph tools
   server.tool(

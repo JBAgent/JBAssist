@@ -27,6 +27,14 @@ export function logToFile(message: string): void {
   }
 }
 
+// Mock auth provider for demo mode (when credentials are not available)
+class MockAuthProvider {
+  async getAccessToken(): Promise<string> {
+    logToFile("Using mock authentication provider (demo mode)");
+    return "demo-token";
+  }
+}
+
 // Custom implementation of the authentication provider
 class CustomAuthProvider {
   private credential: ClientSecretCredential;
@@ -49,15 +57,28 @@ class CustomAuthProvider {
   }
 }
 
+// Check if credentials appear to be demo/placeholder values
+function isDemoCredentials(tenantId: string, clientId: string, clientSecret: string): boolean {
+  return tenantId.includes('demo') || clientId.includes('demo') || clientSecret.includes('demo');
+}
+
 // Initialize standard MS Graph Client
 export function initializeGraphClient(tenantId: string, clientId: string, clientSecret: string, scopes: string[]) {
   try {
     if (!tenantId || !clientId || !clientSecret) {
-      throw new Error("Missing required environment variables for authentication");
+      throw new Error("Missing required credentials for authentication");
     }
 
-    // Create a custom auth provider that doesn't rely on TokenCredentialAuthenticationProvider
-    const authProvider = new CustomAuthProvider(tenantId, clientId, clientSecret, scopes);
+    // Check if using demo credentials
+    const isDemo = isDemoCredentials(tenantId, clientId, clientSecret);
+    let authProvider;
+    
+    if (isDemo) {
+      logToFile("Using demo credentials - MS Graph functionality will be limited");
+      authProvider = new MockAuthProvider();
+    } else {
+      authProvider = new CustomAuthProvider(tenantId, clientId, clientSecret, scopes);
+    }
 
     // Initialize the Graph client
     const graphClient = Client.initWithMiddleware({
@@ -76,11 +97,19 @@ export function initializeGraphClient(tenantId: string, clientId: string, client
 export function initializeGraphBetaClient(tenantId: string, clientId: string, clientSecret: string, scopes: string[]) {
   try {
     if (!tenantId || !clientId || !clientSecret) {
-      throw new Error("Missing required environment variables for authentication");
+      throw new Error("Missing required credentials for authentication");
     }
 
-    // Create a custom auth provider that doesn't rely on TokenCredentialAuthenticationProvider
-    const authProvider = new CustomAuthProvider(tenantId, clientId, clientSecret, scopes);
+    // Check if using demo credentials
+    const isDemo = isDemoCredentials(tenantId, clientId, clientSecret);
+    let authProvider;
+    
+    if (isDemo) {
+      logToFile("Using demo credentials - MS Graph Beta functionality will be limited");
+      authProvider = new MockAuthProvider();
+    } else {
+      authProvider = new CustomAuthProvider(tenantId, clientId, clientSecret, scopes);
+    }
 
     // Initialize the Graph client with beta endpoint
     const graphBetaClient = Client.initWithMiddleware({

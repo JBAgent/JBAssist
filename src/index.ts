@@ -10,7 +10,8 @@ import fs from "fs";
 import "isomorphic-fetch"; // Required for MS Graph client
 import { ClientSecretCredential } from "@azure/identity";
 import { Client } from "@microsoft/microsoft-graph-client";
-import { TokenCredentialAuthenticationProvider } from "@microsoft/microsoft-graph-client/authProviders/azureTokenCredentials";
+// Updated import path for TokenCredentialAuthenticationProvider
+import { TokenCredentialAuthenticationProvider } from "@microsoft/microsoft-graph-client/authProviders/azureTokenCredentials/index.js";
 import dotenv from "dotenv";
 
 // Load environment variables

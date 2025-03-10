@@ -1,0 +1,36 @@
+{
+  "name": "jbassist",
+  "version": "1.0.0",
+  "description": "A Windows-compatible MCP server for querying Microsoft Graph API",
+  "type": "module",
+  "main": "build/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node build/index.js",
+    "dev": "tsc -w"
+  },
+  "keywords": [
+    "mcp",
+    "claude",
+    "windows",
+    "microsoft-graph",
+    "model-context-protocol"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "typescript": "^5.7.2"
+  },
+  "dependencies": {
+    "@azure/identity": "^4.0.0",
+    "@microsoft/microsoft-graph-client": "^3.0.7",
+    "@modelcontextprotocol/sdk": "^1.4.0",
+    "dotenv": "^16.3.1",
+    "isomorphic-fetch": "^3.0.0",
+    "zod": "^3.22.4"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

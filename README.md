@@ -4,12 +4,23 @@ A Windows-compatible implementation of the Model Context Protocol (MCP) server t
 
 ## Overview
 
-This project provides a simple MCP server that allows Claude to interact with Microsoft 365 services through Microsoft Graph API. The server offers several tools:
+This project provides a simple MCP server that allows Claude to interact with Microsoft 365 services through Microsoft Graph API. The server offers a variety of tools to access both standard and beta Graph API features.
+
+### Standard API Tools
 
 1. **get-profile**: Get the current user's profile information
 2. **get-emails**: Retrieve recent emails from the user's inbox
 3. **get-calendar-events**: Get upcoming calendar events for the specified number of days
 4. **search-users**: Search for users in the organization
+
+### Beta API Tools (Extended User Features)
+
+1. **get-enhanced-profile**: Get detailed user profile info including skills, interests, schools, and more
+2. **get-direct-reports**: Get a user's direct reports with detailed information
+3. **get-manager**: Get a user's manager information
+4. **get-presence**: Get a user's presence information (availability status)
+5. **get-teamwork**: Get a user's Microsoft Teams and teamwork activity
+6. **advanced-user-search**: Search for users with advanced filtering by skills, department, job title
 
 ## Prerequisites
 
@@ -41,6 +52,8 @@ This project provides a simple MCP server that allows Claude to interact with Mi
    - Mail.Read
    - Calendars.Read
    - User.Read.All (for user search)
+   - Presence.Read.All (for presence information)
+   - TeamMember.Read.All (for Teams information)
 5. Click "Add permissions"
 6. Click "Grant admin consent for [your organization]"
 
@@ -62,7 +75,7 @@ This project provides a simple MCP server that allows Claude to interact with Mi
    TENANT_ID=your-tenant-id
    CLIENT_ID=your-client-id
    CLIENT_SECRET=your-client-secret
-   SCOPES=User.Read,Mail.Read,Calendars.Read,User.Read.All
+   SCOPES=User.Read,Mail.Read,Calendars.Read,User.Read.All,Presence.Read.All,TeamMember.Read.All
    ```
 
 4. Install dependencies:
@@ -106,10 +119,60 @@ This project provides a simple MCP server that allows Claude to interact with Mi
 
 Once connected, you can ask Claude to use the MS Graph tools with natural language, for example:
 
+### Standard API Examples
+
 - "Can you show me my profile information?"
 - "What are my recent emails?"
 - "Show me my calendar events for the next week."
 - "Can you search for users with the name John?"
+
+### Beta API Examples
+
+- "Get my enhanced profile with skills and interests."
+- "Who are my direct reports?"
+- "Who is my manager?"
+- "What's my current presence status?"
+- "Show me my Teams information."
+- "Search for users in the Marketing department who have SQL skills."
+
+## Beta API Features
+
+The Microsoft Graph beta API provides access to features that are still in development. These features are subject to change and may not be stable. The beta API provides access to:
+
+### Enhanced User Profiles
+
+The beta API offers expanded user profile information, including:
+
+- Skills and expertise
+- Interests
+- Past projects
+- Education history
+- Responsibilities
+- About me information
+- Birthday
+- Preferred languages
+- Alternative email addresses
+
+### Organizational Relationships
+
+- Direct reports hierarchy
+- Manager information
+- Team memberships
+- Team presence and status
+
+### Presence Information
+
+- User availability status
+- Activity information
+- Status messages
+- Teams presence information
+
+### Advanced Search
+
+- Search by skills
+- Search by department 
+- Search by job title
+- Combined search with multiple filters
 
 ## Troubleshooting
 
@@ -127,6 +190,8 @@ If you encounter issues:
 
 6. **Permission Errors in Windows**: Try running Command Prompt or PowerShell as Administrator
 
+7. **Beta API Errors**: Remember that beta API endpoints may change or behave differently than documented
+
 ## Development
 
 To modify the server or add new functionality:
@@ -135,6 +200,16 @@ To modify the server or add new functionality:
 2. Add new tools in `src/index.ts` following the existing patterns
 3. Rebuild with `npm run build`
 4. Restart the server
+
+### Adding New Beta API Features
+
+When adding new beta API features:
+
+1. Reference the [Microsoft Graph beta API documentation](https://learn.microsoft.com/en-us/graph/api/overview?view=graph-rest-beta)
+2. Use the `graphBetaClient` instance for beta API calls
+3. Test thoroughly as beta APIs may change
+4. Add appropriate error handling for beta features
+5. Document any limitations or known issues
 
 ## Additional Microsoft Graph Endpoints
 
